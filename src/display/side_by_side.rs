@@ -1,11 +1,13 @@
 //! Side-by-side (two column) display of diffs.
 
+use cansi::{self, categorise_text};
 use owo_colors::{OwoColorize, Style};
 use rustc_hash::FxHashMap;
 use std::{
     cmp::{max, min},
     collections::HashSet,
 };
+use yansi::{Color, Paint};
 
 use crate::{
     constants::Side,
@@ -470,14 +472,39 @@ pub fn print(
                 match rhs_line_num {
                     Some(rhs_line_num) => {
                         let rhs_line = &rhs_colored_lines[rhs_line_num.as_usize()];
-                        if same_lines {
-                            print!("{}{}", display_rhs_line_num, rhs_line);
+                        let line_to_print = if same_lines {
+                            format!("{}{}", display_rhs_line_num, rhs_line)
                         } else {
-                            print!(
+                            format!(
                                 "{}{}{}",
                                 display_lhs_line_num, display_rhs_line_num, rhs_line
-                            );
-                        }
+                            )
+                        };
+                        let (line_bg, padding_len) = if rhs_lines_with_novel.contains(&rhs_line_num)
+                        {
+                            (
+                                Color::Fixed(194),
+                                display_options.display_width
+                                // we are using cansi::categorize_text to remove ANSI escapes
+                                // if we don't do this, we can't properly pad the line length
+                                // tried several other ANSI stripping libs, this one actually works
+                                    - categorise_text(&line_to_print)
+                                        .iter()
+                                        .map(|s| (s.end - s.start) as usize)
+                                        .sum::<usize>(),
+                            )
+                        } else {
+                            (Color::Default, 0)
+                        };
+                        println!(
+                            "{}",
+                            Paint::wrapping(format!(
+                                "{}{}",
+                                line_to_print,
+                                " ".repeat(padding_len)
+                            ))
+                            .bg(line_bg)
+                        );
                     }
                     None => {
                         // We didn't have any changed RHS lines in the
@@ -490,17 +517,42 @@ pub fn print(
                 match lhs_line_num {
                     Some(lhs_line_num) => {
                         let lhs_line = &lhs_colored_lines[lhs_line_num.as_usize()];
-                        if same_lines {
-                            print!("{}{}", display_lhs_line_num, lhs_line);
+                        let line_to_print = if same_lines {
+                            format!("{}{}", display_lhs_line_num, lhs_line)
                         } else {
-                            print!(
+                            format!(
                                 "{}{}{}",
-                                display_lhs_line_num, display_rhs_line_num, lhs_line
-                            );
-                        }
+                                display_lhs_line_num, display_lhs_line_num, lhs_line
+                            )
+                        };
+                        let (line_bg, padding_len) = if lhs_lines_with_novel.contains(&lhs_line_num)
+                        {
+                            (
+                                Color::Fixed(224),
+                                display_options.display_width
+                                // we are using cansi::categorize_text to remove ANSI escapes
+                                // if we don't do this, we can't properly pad the line length
+                                // tried several other ANSI stripping libs, this one actually works
+                                    - categorise_text(&line_to_print)
+                                        .iter()
+                                        .map(|s| (s.end - s.start) as usize)
+                                        .sum::<usize>(),
+                            )
+                        } else {
+                            (Color::Default, 0)
+                        };
+                        println!(
+                            "{}",
+                            Paint::wrapping(format!(
+                                "{}{}",
+                                line_to_print,
+                                " ".repeat(padding_len)
+                            ))
+                            .bg(line_bg)
+                        );
                     }
                     None => {
-                        println!("{}{}", display_lhs_line_num, display_rhs_line_num);
+                        println!("{}{}", display_lhs_line_num, display_lhs_line_num);
                     }
                 }
             } else {
@@ -573,7 +625,28 @@ pub fn print(
                         s
                     };
 
-                    println!("{}{}{}{}{}", lhs_num, lhs_line, SPACER, rhs_num, rhs_line);
+                    println!(
+                        "{}{}{}",
+                        Paint::wrapping(format!("{}{}", lhs_num, lhs_line)).bg(
+                            if lhs_line_num.is_some()
+                                && lhs_lines_with_novel.contains(&lhs_line_num.unwrap())
+                            {
+                                Color::Fixed(224)
+                            } else {
+                                Color::Default
+                            }
+                        ),
+                        SPACER,
+                        Paint::wrapping(format!("{}{}", rhs_num, rhs_line)).bg(
+                            if rhs_line_num.is_some()
+                                && rhs_lines_with_novel.contains(&rhs_line_num.unwrap())
+                            {
+                                Color::Fixed(194)
+                            } else {
+                                Color::Default
+                            }
+                        ),
+                    );
                 }
             }
 

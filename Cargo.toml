@@ -7,7 +7,11 @@ license = "MIT"
 version = "0.38.0"
 authors = ["Wilfred Hughes <me@wilfred.me.uk>"]
 keywords = ["diff", "syntax"]
-categories = ["development-tools", "command-line-utilities", "parser-implementations"]
+categories = [
+        "development-tools",
+        "command-line-utilities",
+        "parser-implementations",
+]
 edition = "2018"
 rust-version = "1.57.0"
 include = [
@@ -46,6 +50,8 @@ owo-colors = "3.3.0"
 wu-diff = "0.1.2"
 rayon = "1.5.2"
 tree_magic_mini = "3.0.2"
+yansi = "0.5.1"
+cansi = "2.1.1"
 bumpalo = "3.9.1"
 unicode-width = "0.1.9"
 term_size = "0.3.2"

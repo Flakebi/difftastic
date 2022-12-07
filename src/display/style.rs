@@ -106,7 +106,7 @@ pub fn split_and_apply(
     assert!(max_len > 0);
 
     if styles.is_empty() && !line.trim().is_empty() {
-        return split_string_by_width(line, max_len, matches!(side, Side::Left))
+        return split_string_by_width(line, max_len, true)
             .into_iter()
             .map(|(part, pad)| {
                 let mut res = String::with_capacity(part.len() + pad);
@@ -127,7 +127,7 @@ pub fn split_and_apply(
     let mut styled_parts = vec![];
     let mut part_start = 0;
 
-    for (line_part, pad) in split_string_by_width(line, max_len, matches!(side, Side::Left)) {
+    for (line_part, pad) in split_string_by_width(line, max_len, true) {
         let mut res = String::with_capacity(line_part.len() + pad);
         let mut prev_style_end = 0;
         for (span, style) in styles {
@@ -260,13 +260,13 @@ fn style_lines(lines: &[&str], styles: &[(SingleLineSpan, Style)]) -> Vec<String
 pub fn novel_style(style: Style, side: Side, background: BackgroundColor) -> Style {
     if background.is_dark() {
         match side {
-            Side::Left => style.bright_red(),
-            Side::Right => style.bright_green(),
+            Side::Left => style.on_red(),
+            Side::Right => style.on_green(),
         }
     } else {
         match side {
-            Side::Left => style.red(),
-            Side::Right => style.green(),
+            Side::Left => style.on_bright_red(),
+            Side::Right => style.on_bright_green(),
         }
     }
 }
