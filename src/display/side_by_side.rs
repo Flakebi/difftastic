@@ -496,7 +496,7 @@ pub fn print(
                         } else {
                             (Color::Default, 0)
                         };
-                        println!(
+                        print!(
                             "{}",
                             Paint::wrapping(format!(
                                 "{}{}",
@@ -522,7 +522,7 @@ pub fn print(
                         } else {
                             format!(
                                 "{}{}{}",
-                                display_lhs_line_num, display_lhs_line_num, lhs_line
+                                display_lhs_line_num, display_rhs_line_num, lhs_line
                             )
                         };
                         let (line_bg, padding_len) = if lhs_lines_with_novel.contains(&lhs_line_num)
@@ -541,7 +541,7 @@ pub fn print(
                         } else {
                             (Color::Default, 0)
                         };
-                        println!(
+                        print!(
                             "{}",
                             Paint::wrapping(format!(
                                 "{}{}",
@@ -626,8 +626,9 @@ pub fn print(
                     };
 
                     println!(
-                        "{}{}{}",
-                        Paint::wrapping(format!("{}{}", lhs_num, lhs_line)).bg(
+                        "{}{}{}{}{}",
+                        lhs_num,
+                        Paint::wrapping(lhs_line).bg(
                             if lhs_line_num.is_some()
                                 && lhs_lines_with_novel.contains(&lhs_line_num.unwrap())
                             {
@@ -637,7 +638,8 @@ pub fn print(
                             }
                         ),
                         SPACER,
-                        Paint::wrapping(format!("{}{}", rhs_num, rhs_line)).bg(
+                        rhs_num,
+                        Paint::wrapping(rhs_line).bg(
                             if rhs_line_num.is_some()
                                 && rhs_lines_with_novel.contains(&rhs_line_num.unwrap())
                             {
